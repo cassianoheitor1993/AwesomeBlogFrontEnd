@@ -1,0 +1,26 @@
+.articles-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0px;
+  }
+  
+  .news-card-container {
+    display: flex;
+    align-items: stretch;
+    margin: 10px;
+    min-width: 250px;
+  }
+
+  
+  .pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0px;
+  }
