@@ -1,168 +1,120 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
-const Navbar = styled.nav`
-  width: 100%;
-  background-color: #333;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
-  }
-`;
-
-const NavTitle = styled.h1`
-  font-size: 1.5em;
-  color: white;
-  margin: 0;
-
-  @media (max-width: 768px) {
-    font-size: 1.2em;
-  }
-`;
-
-const NavLinks = styled.ul`
-  display: flex;
-  list-style: none;
-  gap: 0px;
-  margin: 0;
-  padding: 0;
-
-  @media (max-width: 768px) {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    background-color: #222;
-    padding: 10px;
-    position: absolute;
-    top: 53px;
-    left: 0;
-    z-index: 10;
-
-    &.open {
-      display: block;
-    }
-
-    li {
-      margin: 5px 0;
-    }
-
-    a {
-      padding: 5px;
-    }
-
-    a:hover {
-      background-color: #444;
-      width: 100%;
-      border-radius: 5px;
-      margin: 0;
-    }
-  }
-`;
-
-const NavItem = styled.li`
-  width: 100%;
-
-  a {
-    display: block;
-    width: 100%;
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 10px 20px;
-    border-radius: 5px;
-    margin: 0;
-
-    &.active {
-      background-color: #555;
-      color: #ddd;
-    }
-
-    &:hover {
-      background-color: #444;
-      color: #ddd;
-    }
-  }
-`;
-
-const MenuButton = styled.button`
-  display: none;
-  background: none;
-  color: white;
-  font-size: 1.8em;
-  border: none;
-  cursor: pointer;
-  z-index: 20;
-
-  @media (max-width: 768px) {
-    display: block;
-    flex: 1;
-    text-align: right;
-    align-self: flex-end;
-    align-items: center;
-    align-content: center;
-    top: 0;
-  }
-`;
-
-const NavHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-`;
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './Menu.css';
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
+  useEffect(() => {
+    const savedNotifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    setNotifications(savedNotifications);
+  
+    const ws = new WebSocket('ws://localhost:8081/ws/notifications/');
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setNotifications((prev) => {
+        const updated = [...prev, data];
+        localStorage.setItem('notifications', JSON.stringify(updated));
+        return updated;
+      });
+    };
+    
+    ws.onclose = () => console.log('WebSocket connection closed');
+    return () => ws.close();
+  }, []);
+  
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const dismissNotification = (index) => {
+    // remove the notification with the given index from the local storage
+    const savedNotifications = JSON.parse(localStorage.getItem('notifications')) || [];
+    localStorage.setItem('notifications', JSON.stringify(savedNotifications.filter((_, i) => i !== index)));
+    setNotifications(notifications.filter((_, i) => i !== index));
+  };
+
   return (
-    <Navbar>
-      <NavHeader>
-        <NavTitle
-          style={{
-            fontSize: '1.5em',
-            color: 'white',
-            margin: 0,
-          }}
-        >
+    <nav className="navbar">
+      <div className="nav-header">
+        <h1 className="nav-title">
           <NavLink to="/" style={{ color: 'white', textDecoration: 'none' }}>
             Amazing Blog
           </NavLink>
-        </NavTitle>
-        <MenuButton onClick={toggleMenu}>
+        </h1>
+        <button className="menu-button" onClick={toggleMenu}>
           <i className={`bi bi-${isOpen ? 'x' : 'list'}`}></i>
-        </MenuButton>
-      </NavHeader>
-      <NavLinks className={isOpen ? 'open' : ''}>
-        <NavItem>
-          <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
-            Home
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}>
-            About
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink to="/contact" className={({ isActive }) => (isActive ? "active" : "")}>
-            Contact
-          </NavLink>
-        </NavItem>
-      </NavLinks>
-    </Navbar>
+        </button>
+        <div className="nav-links-container">
+          <ul className={`nav-links ${isOpen ? 'open' : ''}`}>
+          <li className="nav-item">
+            <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
+              Home
+            </NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}>
+              About
+            </NavLink>
+          </li>
+          <li className="nav-item">
+            <NavLink to="/contact" className={({ isActive }) => (isActive ? "active" : "")}>
+              Contact
+            </NavLink>
+          </li>
+          </ul>
+          <div className="notification-icon" onClick={toggleDropdown}>
+            {showDropdown ? (
+              <i className="bi bi-bell-fill"></i>
+            ) : (
+              <i className="bi bi-bell"></i>
+            )}
+            {notifications.length > 0 && (
+              <span className="notification-count">{notifications.length}</span>
+            )}
+            {showDropdown && (
+              <div className="notification-dropdown">
+                <ul>
+                  {notifications.length > 0 ? (
+                    notifications.map((notification, index) => (
+                      <li key={index} className="notification-item">
+                        <div className="notification-content">
+                          <div className='card'>
+                            <div className='card-body'>
+                              <a href={notification.article_link} target='_blank' rel='noreferrer'>
+                                <h6 className='card-title d-flex justify-content-between'>
+                                  <span className='badge bg-primary'>
+                                    <i class="bi bi-patch-exclamation-fill text-white"></i> New Article: </span><br></br>
+                                </h6>
+                                <h3 className='card-title fw-bold'>{notification.article_name}</h3>
+                                <p className='card-subtitle mb-2 text-muted'>by {notification.article_author} | {notification.article_date}</p>
+                                <p className='card-text'>{notification.article_summary}</p>
+                              </a>
+                              <button className='btn btn-danger' onClick={() => dismissNotification(index)}>Dismiss</button>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                    ))
+                  ) : (
+                    <li>There are no notifications for you</li>
+                  )}
+                </ul>
+              </div>
+            )}
+        
+          </div>
+        </div>
+      </div>
+    </nav>
   );
 };
 
