@@ -5,11 +5,11 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import { format } from 'date-fns';
-import parse, { domToReact } from 'html-react-parser';
+import parse from 'html-react-parser';
 
 const NewsCard = ({ article }) => {
   const formattedDate = format(new Date(article.created_at), 'MMMM dd, yyyy');
-  const articleImage = article.images[0]?.image || 'path/to/default/image.jpg';
+  const articleImage = article.images?.[0]?.image || 'https://via.placeholder.com/300';
   const transform = (node) => {
     if (node.type === 'tag' && node.name === 'img') {
       return null;

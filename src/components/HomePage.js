@@ -90,7 +90,7 @@ const HomePage = () => {
       </div>
 
       {/* Bottom Pagination */}
-      <div className="pagination-container">
+      <div className="pagination-container mb-4">
         <Pagination>
           <Pagination.First 
             onClick={() => handlePageChange(1)} 

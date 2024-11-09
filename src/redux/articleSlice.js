@@ -1,3 +1,4 @@
+// blognews-frontend/src/redux/articleSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -19,7 +20,19 @@ const articleSlice = createSlice({
     setPage: (state, action) => {
       state.currentPage = action.payload;
     },
-  },
+    deleteArticle: (state, action) => {
+      // Ensure payload is not an array
+      const articleId = Array.isArray(action.payload) ? action.payload[0] : action.payload;
+      // Create a new array and apply the filter operation
+      const filteredArticles = state.articles.filter((article) => article.id !== articleId);
+      state.articles = [...filteredArticles];
+    },       
+    addNewArticle: (state, action) => {
+      console.log('Adding new article:', action.payload);
+      state.articles = [action.payload, ...JSON.parse(JSON.stringify(state.articles))];
+      console.log('New articles:', state.articles);
+    },      
+},
   extraReducers: (builder) => {
     builder
       .addCase(fetchArticles.pending, (state) => {
@@ -37,5 +50,5 @@ const articleSlice = createSlice({
   },
 });
 
-export const { setPage } = articleSlice.actions;
+export const { setPage, deleteArticle, addNewArticle } = articleSlice.actions;
 export default articleSlice.reducer;
