@@ -7,7 +7,7 @@ import './ArticlePage.css';
 import { format } from 'date-fns';
 
 const addBaseUrlToImages = (htmlString) => {
-  const baseUrl = 'http://127.0.0.1:8081/';
+  const baseUrl = 'http://192.168.0.166:8081/';
   return htmlString.replace(/src="\/media\/uploads/g, `src="${baseUrl}media/uploads`);
 };
 
@@ -16,7 +16,7 @@ const ArticlePage = () => {
   const [article, setArticle] = useState(null);
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8081/api/v1/articles/${id}/`)
+    axios.get(`http://192.168.0.166:8081/api/v1/articles/${id}/`)
       .then(response => setArticle(response.data))
       .catch(error => console.error('Error fetching article:', error));
   }, [id]);

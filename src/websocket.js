@@ -5,7 +5,7 @@ import { deleteArticle, addNewArticle  } from './redux/articleSlice';
 let socket;
 
 function connectWebSocket() {
-    socket = new WebSocket('ws://127.0.0.1:8081/ws/notifications/');
+    const socket = new WebSocket('ws://192.168.0.166:8081/ws/notifications/');
 
     socket.onopen = function(e) {
         console.log("[open] Connection established");

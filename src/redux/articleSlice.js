@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 export const fetchArticles = createAsyncThunk('articles/fetchArticles', async (page = 1) => {
-  const response = await axios.get(`http://127.0.0.1:8081/api/v1/articles/?page=${page}`);
+  const response = await axios.get(`http://192.168.0.166:8081/api/v1/articles/?page=${page}`);
   return response.data;
 });
 
@@ -28,9 +28,7 @@ const articleSlice = createSlice({
       state.articles = [...filteredArticles];
     },       
     addNewArticle: (state, action) => {
-      console.log('Adding new article:', action.payload);
       state.articles = [action.payload, ...JSON.parse(JSON.stringify(state.articles))];
-      console.log('New articles:', state.articles);
     },      
 },
   extraReducers: (builder) => {

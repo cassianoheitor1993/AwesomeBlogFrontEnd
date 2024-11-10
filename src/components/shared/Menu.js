@@ -3,11 +3,17 @@ import { NavLink } from 'react-router-dom';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Menu.css';
+import DOMPurify from 'dompurify';
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const stripHtmlAndTruncate = (htmlString, maxLength) => {
+    const cleanText = DOMPurify.sanitize(htmlString, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+    return cleanText.length > maxLength ? cleanText.substring(0, maxLength) + '...' : cleanText;
+  };
 
   const handleDeletedArticle = useCallback((data) => {
     const articleIds = Array.isArray(data.article_id) ? data.article_id.map(id => id?.toString()) : [data.article_id?.toString()];
@@ -24,7 +30,7 @@ const Menu = () => {
   useEffect(() => {
     const savedNotifications = JSON.parse(localStorage.getItem('notifications')) || [];
     setNotifications(savedNotifications);
-    const ws = new WebSocket('ws://localhost:8081/ws/notifications/');
+    const ws = new WebSocket('ws://192.168.0.166:8081/ws/notifications/');
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.message === 'Article deleted') {
@@ -32,6 +38,7 @@ const Menu = () => {
       } else {
         setNotifications((prev) => {
           const newNotifications = [...prev, data];
+          console.log('New notifications:', newNotifications);
           localStorage.setItem('notifications', JSON.stringify(newNotifications));
           return newNotifications;
         });
@@ -109,11 +116,11 @@ const Menu = () => {
                                 <span className='badge bg-primary'>
                                   <i className="bi bi-patch-exclamation-fill text-white"></i> New Article: </span><br></br>
                               </h6>
-                              <a href={`/articles/${notification.article_data.id}`} target='_blank' rel='noreferrer'>
+                              <NavLink to={`/articles/${notification.article_data.id}`} target='_blank' rel='noreferrer'>
                                 <h3 className='card-title fw-bold'>{notification.article_data.title}</h3>
                                 <p className='card-subtitle mb-2 text-muted'>by {notification.article_data.author.username} | {notification.article_data.created_at}</p>
-                                <p className='card-text'>{notification.article_data.body}</p>
-                              </a>
+                                <p className='card-text'>{stripHtmlAndTruncate(notification.article_data.body, 50)}</p>
+                              </NavLink>
                               <button className='btn btn-danger' onClick={() => dismissNotification(index)}>Dismiss</button>
                             </div>
                           </div>
